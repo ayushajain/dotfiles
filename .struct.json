@@ -1,0 +1,8 @@
+{
+    "home": [
+    ".config": ["nvim", "git"],
+    ".local": {
+        "share": ["nvim"]
+    }
+}
+
