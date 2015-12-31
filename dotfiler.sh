@@ -26,11 +26,7 @@ ln -sf ~/.zsh/prezto ~/
 rm -rf ~/.zprezto
 mv ~/prezto ~/.zprezto
 
-for i in "${LOCAL_FILES[@]}"
+for i in "${ZSH_FILES[@]}"
 do
-    if [ -d $BASEDIR/.local/share/$i ] ; then
-        ln -nsf $BASEDIR/.local/share/$i ~/.local/share/
-    else
-        ln -nsf $BASEDIR/.local/share/$i ~/.local/share/$i
-    fi
+    ln -nsf ~/.zprezto/runcoms/$i ~/.$i
 done
