@@ -1,6 +1,6 @@
-HOME_FILES=(".tmux.conf" ".zlogin" ".zlogout" ".zprezto" ".zpreztorc" ".zprofile" ".zsh" ".zshenv" ".zshrc" ".ctags" ".fasd" ".fasd-init-bash" ".vim" ".vimrc")
+HOME_FILES=(".tmux.conf" ".zsh" ".ctags" ".fasd" ".fasd-init-bash" ".vim" ".vimrc")
+ZSH_FILES=("zlogin" "zlogout" "zpreztorc" "zprofile" "zshenv" "zshrc")
 CONFIG_FILES=("nvim" "git")
-LOCAL_FILES=("nvim")
 
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -21,6 +21,10 @@ do
         ln -nsf $BASEDIR/.config/$i ~/.config/$i
     fi
 done
+
+ln -sf ~/.zsh/prezto ~/
+rm -rf ~/.zprezto
+mv ~/prezto ~/.zprezto
 
 for i in "${LOCAL_FILES[@]}"
 do

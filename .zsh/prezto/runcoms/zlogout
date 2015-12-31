@@ -7,5 +7,7 @@
 
 # Print the message.
 cat <<-EOF
-Swiggity Swag
+
+Thank you. Come again!
+  -- Dr. Apu Nahasapeemapetilon
 EOF
