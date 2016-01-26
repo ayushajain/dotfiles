@@ -21,7 +21,12 @@ Plug 'kassio/neoterm'
 Plug 'tpope/vim-sleuth'
 Plug 'simnalamburt/vim-mundo'
 Plug 'airblade/vim-gitgutter'
-Plug 'vim-scripts/ZoomWin'
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+Plug 'vim-scripts/TagHighlight'  "not working probably
+Plug 'Raimondi/delimitMate'
+Plug 'mhinz/vim-startify'
+Plug 'kana/vim-textobj-user'
 
 " Zen mode Plugins
 Plug 'amix/vim-zenroom2'
@@ -29,6 +34,11 @@ Plug 'junegunn/goyo.vim'
 
 call plug#end()
 
+" TODO:
+" morhetz/gruvbox                     an alternate colorscheme
+" 29decibel/codeschool-vim-theme      decent colorscheme
+" w0ng/vim-hybrid                     good rainbow style colorscheme
+"
 " }}}
 
 
@@ -53,13 +63,17 @@ let mapleader = "\<Space>"
 " }}}
 
 
-" Snippets & Autocompletion {{{
-"let g:UltiSnipsExpandTrigger="<c-m>"
-
+" snippets & autocompletion {{{
 let g:deoplete#enable_at_startup = 1
 set completeopt+=noinsert
 
-let g:SuperTabDefaultCompletionType = "<c-n>"
+let g:supertabdefaultcompletiontype = "<c-n>"
+
+let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+let g:ycm_key_list_previous_completion = ['<C-S-n>', '<Up>']
+let g:ycm_autoclose_preview_window_after_insertion = 1
+let g:ycm_autoclose_preview_window_after_completion = 1
+
 " }}}
 
 
@@ -102,7 +116,7 @@ set smartcase       " ...unless we type a capital
 " Custom Settings {{{
 inoremap jj <ESC>
 map j <ESC>
-map <Leader>w :w<CR>
+map <Leader>ww :w<CR>
 map <Leader>qa :xa<CR>
 map <Leader>xa :qa!<CR>
 map <Leader>qq :x<CR>
@@ -115,6 +129,7 @@ noremap <Leader>u :GundoToggle<CR>
 nnoremap zA :call ToggleAllFolds()<CR>
 nnoremap <silent> <leader>z :Goyo<cr>
 vnoremap <C-r> "0y<Esc>:%s/<C-r>0//g<left><left>
+map <Leader>; <C-o>A;
 
 " Git kebinds
 map <Leader>gg :GitGutterToggle<CR>
@@ -127,6 +142,9 @@ nnoremap <ESC> :noh<return><ESC>
 
 nmap <silent> <Leader>sv :source ~/.config/nvim/init.vim<CR>
 nmap <silent> <Leader>ev :tabedit ~/.config/nvim/init.vim<CR>
+
+nmap <Leader>ve :let &virtualedit=&virtualedit=="" ? "all" : "" <bar> set virtualedit?<cr>
+
 
 let g:Folds_Open = 0
 
@@ -156,6 +174,7 @@ nmap <Leader>p "+p
 nmap <Leader>P "+P
 vmap <Leader>p "+p
 vmap <Leader>P "+P
+
 "Moves cursor to end of pasted text
 vnoremap <silent> y y`]
 vnoremap <silent> p p`]
@@ -170,17 +189,25 @@ noremap gV `[v`]
 let g:lightline = {
       \ 'colorscheme': 'solarized',
       \ 'active': {
-      \   'left': [ [ 'mode', 'paste' ],
+      \   'left': [ [ 'mode', 'paste', 'virtualedit' ],
       \             [ 'fugitive', 'readonly', 'filename', 'modified' ] ]
       \ },
       \ 'component_function': {
       \   'fugitive': 'LightLineFugitive',
       \   'readonly': 'LightLineReadonly',
-      \   'modified': 'LightLineModified'
+      \   'modified': 'LightLineModified',
+      \   'virtualedit': 'LightLineVirtualEdit'
       \ },
       \ 'separator': { 'left': '', 'right': '' },
       \ 'subseparator': { 'left': '', 'right': '' }
       \ }
+
+function! LightLineVirtualEdit()
+  if &virtualedit == "all"
+    return "VirtualEdit"
+  endif
+  return ""
+endfunction
 
 function! LightLineModified()
   if &filetype == "help"
@@ -302,6 +329,63 @@ endfunction
 " }}}
 
 
-" Formatters {{{
+" Java Eclim Setup {{{
+let g:EclimProjectTreeAutoOpen = 1
 
-"}}}
+
+map <Leader>jr :Java<CR>
+map <Leader>jrr :call RunJavaProjectInNeoterm()<CR>
+map <Leader>jn :ProjectTreeToggle<CR>
+map <Leader>jo :call SetupProject()<CR>
+
+
+function! ConvertSpacesToEscapeCharacters(str)
+  return substitute(a:str, " ", "\\\\ ", "g")
+endfunction
+
+function! SetupProject()
+  call inputsave()
+  let g:JavaProjectName = input('Enter Project Name: ')
+  call inputrestore()
+
+  exec "ProjectOpen" g:JavaProjectName
+  exec "ProjectTree" g:JavaProjectName
+  redir @i | exec "ProjectInfo" g:JavaProjectName
+
+  call UpdateJavaPathVariables()
+endfunction
+
+function! RunJavaProjectInNeoterm()
+  if &ft == "java"
+    call UpdateJavaPathVariables()
+    let className = substitute(substitute(@%, ".*\/", "", ""), ".java", "", "g")
+    let g:jRun = "T java -cp " . g:JavaProjectPath .  "/bin " . className
+    exec "" g:jRun
+  endif
+endfunction
+
+function! UpdateJavaPathVariables()
+  let g:infoLines = split(@i, "\n")
+  let g:JavaProjectPath = substitute(substitute(g:infoLines[1], "^.*\/Users\/ayush", "~", ""), " ", "\\\\ ", "g")
+  let g:JavaWorkspacePath = substitute(g:infoLines[2], "^.*\/Users\/ayush", "~", "")
+endfunction
+
+
+" }}}
+
+
+
+
+let g:startify_custom_header = [
+      \ '',
+      \ '███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗    ██╗       ██╗   ██╗██╗███╗   ███╗    ██╗        ███████╗███╗   ███╗ █████╗  ██████╗███████╗',
+      \ '████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║     ╚██╗     ██║   ██║██║████╗ ████║     ╚██╗      ██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝',
+      \ '██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║       ╚██╗   ██║   ██║██║██╔████╔██║       ╚██╗    █████╗  ██╔████╔██║███████║██║     ███████╗',
+      \ '██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║      ██╔╝    ╚██╗ ██╔╝██║██║╚██╔╝██║      ██╔╝     ██╔══╝  ██║╚██╔╝██║██╔══██║██║     ╚════██║',
+      \ '██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║    ██╔╝       ╚████╔╝ ██║██║ ╚═╝ ██║    ██╔╝       ███████╗██║ ╚═╝ ██║██║  ██║╚██████╗███████║',
+      \ '╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝    ╚═╝         ╚═══╝  ╚═╝╚═╝     ╚═╝    ╚═╝       ╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝',
+      \ '',
+      \ '',
+      \ ]
+
+

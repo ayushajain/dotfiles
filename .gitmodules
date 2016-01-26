@@ -1,0 +1,3 @@
+[submodule "change-inside-surroundings.vim"]
+	path = .config/nvim/plugins/change-inside-surroundings.vim
+	url = git://github.com/briandoll/change-inside-surroundings.vim
