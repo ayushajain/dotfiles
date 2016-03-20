@@ -26,7 +26,9 @@ Plug 'honza/vim-snippets'
 Plug 'vim-scripts/TagHighlight'  "not working probably
 Plug 'Raimondi/delimitMate'
 Plug 'mhinz/vim-startify'
-Plug 'kana/vim-textobj-user'
+Plug 'kana/vim-textobj-user'    "configure this
+Plug 'mattn/emmet-vim'
+Plug 'pangloss/vim-javascript'
 
 " Zen mode Plugins
 Plug 'amix/vim-zenroom2'
@@ -43,6 +45,25 @@ call plug#end()
 
 
 " General Config {{{
+
+set noswapfile
+set nobackup
+set nowb
+set autoindent
+set smartindent
+set smarttab
+set shiftwidth=4
+set softtabstop=2
+set tabstop=4
+set expandtab
+set list listchars=tab:\ \ ,trail:·   " Display tabs and trailing spaces visually
+set nowrap       "Don't wrap lines
+set linebreak    "Wrap lines at convenient points
+set sidescrolloff=15
+set sidescroll=1
+set hlsearch        " Highlight searches by default
+set ignorecase      " Ignore case when searching...
+set smartcase       " ...unless we type a capital
 set number                      "Line numbers are good
 set backspace=indent,eol,start  "Allow backspace in insert mode
 set history=1000                "Store lots of :cmdline history
@@ -60,62 +81,24 @@ colorscheme solarized
 syntax enable   "turn on syntax highlighting
 filetype plugin indent on
 let mapleader = "\<Space>"
+
 " }}}
 
 
-" snippets & autocompletion {{{
+" Snippets & Autocompletion {{{
+
 let g:deoplete#enable_at_startup = 1
 set completeopt+=noinsert
-
 let g:supertabdefaultcompletiontype = "<c-n>"
+let g:UltiSnipsExpandTrigger = "<c-s>"
 
-let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
-let g:ycm_key_list_previous_completion = ['<C-S-n>', '<Up>']
-let g:ycm_autoclose_preview_window_after_insertion = 1
-let g:ycm_autoclose_preview_window_after_completion = 1
-
-" }}}
-
-
-" Turn Off swap Files {{{
-set noswapfile
-set nobackup
-set nowb
-" }}}
-
-
-" Indentation {{{
-set autoindent
-set smartindent
-set smarttab
-set shiftwidth=4
-set softtabstop=2
-set tabstop=4
-set expandtab
-set list listchars=tab:\ \ ,trail:·   " Display tabs and trailing spaces visually
-set nowrap       "Don't wrap lines
-set linebreak    "Wrap lines at convenient points
-" }}}
-
-
-" Scrolling {{{
-set scrolloff=8         "Start scrolling when we're 8 lines away from margins
-set sidescrolloff=15
-set sidescroll=1
-" }}}
-
-
-" Search {{{
-set incsearch       " Find the next match as we type the search
-set hlsearch        " Highlight searches by default
-set ignorecase      " Ignore case when searching...
-set smartcase       " ...unless we type a capital
 " }}}
 
 
 " Custom Settings {{{
+
 inoremap jj <ESC>
-map j <ESC>
+map <silent>j <ESC>
 map <Leader>ww :w<CR>
 map <Leader>qa :xa<CR>
 map <Leader>xa :qa!<CR>
@@ -126,9 +109,15 @@ map <Leader>nb :NERDTreeFromBookmark
 map <Leader>nf :NERDTreeFind<CR>
 map <Leader>fmt :Autoformat<CR>
 noremap <Leader>u :GundoToggle<CR>
-nnoremap zA :call ToggleAllFolds()<CR>
+
+" use escape to turn off highlight
+nnoremap <silent><ESC> :noh<return><ESC>
 nnoremap <silent> <leader>z :Goyo<cr>
+nnoremap zA :call ToggleAllFolds()<CR>
 vnoremap <C-r> "0y<Esc>:%s/<C-r>0//g<left><left>
+nmap <silent> <Leader>sv :source ~/.config/nvim/init.vim<CR>
+nmap <silent> <Leader>ev :tabedit ~/.config/nvim/init.vim<CR>
+nmap <Leader>ve :let &virtualedit=&virtualedit=="" ? "all" : "" <bar> set virtualedit?<cr>
 map <Leader>; <C-o>A;
 
 " Git kebinds
@@ -137,14 +126,24 @@ map <Leader>gb :Gblame<CR>
 map <Leader>gs :Gstatus<CR>
 map <Leader>gh :GitGutterLineHighlightsToggle<CR>
 
-" use escape to turn off highlight
-nnoremap <ESC> :noh<return><ESC>
+"Leader + command to copy/paste/cut/delete
+vmap <Leader>y "+y
+vmap <Leader>d "+d
+nmap <Leader>p "+p
+nmap <Leader>P "+P
+vmap <Leader>p "+p
+vmap <Leader>P "+P
 
-nmap <silent> <Leader>sv :source ~/.config/nvim/init.vim<CR>
-nmap <silent> <Leader>ev :tabedit ~/.config/nvim/init.vim<CR>
+"Moves cursor to end of pasted text
+vnoremap <silent> y y`]
+vnoremap <silent> p p`]
+nnoremap <silent> p p`]
 
-nmap <Leader>ve :let &virtualedit=&virtualedit=="" ? "all" : "" <bar> set virtualedit?<cr>
+"Select pasted text
+noremap gV `[v`]
 
+nmap <Leader>bg :call ToggleBackground()<CR>
+nmap <Leader>set :call EnvironmentSetup()<CR>
 
 let g:Folds_Open = 0
 
@@ -167,25 +166,37 @@ function! NERDTreeIsAlreadyToggled()
   endif
 endfunction
 
-"Leader + command to copy/paste/cut/delete
-vmap <Leader>y "+y
-vmap <Leader>d "+d
-nmap <Leader>p "+p
-nmap <Leader>P "+P
-vmap <Leader>p "+p
-vmap <Leader>P "+P
 
-"Moves cursor to end of pasted text
-vnoremap <silent> y y`]
-vnoremap <silent> p p`]
-nnoremap <silent> p p`]
+let g:NERDTreeOpened = 0
 
-"Select pasted text
-noremap gV `[v`]
+function! EnvironmentSetup()
+  if g:NERDTreeOpened == 0
+    call IsNeoTermOpen()
+    NERDTree
+    let g:NERDTreeOpened = 1
+  else
+    call IsNeoTermOpen()
+    execute "NERDTreeTabsToggle"
+  endif
+endfunction
+
+let g:IsDark = 1
+
+function! ToggleBackground()
+  if g:IsDark == 1
+    set background=light
+    let g:IsDark = 0
+  else
+    set background=dark
+    let g:IsDark = 1
+  endif
+endfunction
+
 " }}}
 
 
 " Status Line {{{
+
 let g:lightline = {
       \ 'colorscheme': 'solarized',
       \ 'active': {
@@ -246,10 +257,12 @@ endfunction
 
 " Use status bar even with single buffer
 set laststatus=2
+
 " }}}
 
 
 " Neoterm {{{
+
 let g:neoterm_position = 'horizontal'
 let g:neoterm_automap_keys = '<Leader>rt'
 let g:neoterm_size = 10
@@ -277,12 +290,11 @@ set statusline+=%#NeotermTestRunning#%{neoterm#test#status('running')}%*
 set statusline+=%#NeotermTestSuccess#%{neoterm#test#status('success')}%*
 set statusline+=%#NeotermTestFailed#%{neoterm#test#status('failed')}%*
 
-" Git commands
-command! -nargs=+ Tg :T git <args>
 " }}}
 
 
 " Easymotion {{{
+
 map <Leader>e <Plug>(easymotion-prefix)
 
 map sn <Plug>(easymotion-sn)
@@ -295,37 +307,6 @@ let g:EasyMotion_use_upper = 1
 let g:EasyMotion_smartcase = 1
 " Smartsign (type `3` and match `3`&`#`)
 let g:EasyMotion_use_smartsign_us = 1
-" }}}
-
-
-" Environment setup {{{
-
-nmap <Leader>set :call EnvironmentSetup()<CR>
-let g:NERDTreeOpened = 0
-
-function! EnvironmentSetup()
-  if g:NERDTreeOpened == 0
-    call IsNeoTermOpen()
-    NERDTree
-    let g:NERDTreeOpened = 1
-  else
-    call IsNeoTermOpen()
-    execute "NERDTreeTabsToggle"
-  endif
-endfunction
-
-nmap <Leader>bg :call ToggleBackground()<CR>
-let g:IsDark = 1
-
-function! ToggleBackground()
-  if g:IsDark == 1
-    set background=light
-    let g:IsDark = 0
-  else
-    set background=dark
-    let g:IsDark = 1
-  endif
-endfunction
 " }}}
 
 
@@ -374,7 +355,10 @@ endfunction
 " }}}
 
 
+" Custom Header {{{
 
+let @b = system("fortune | cowsay")
+let g:cow_header = split(@b, "\n")
 
 let g:startify_custom_header = [
       \ '',
@@ -388,4 +372,9 @@ let g:startify_custom_header = [
       \ '',
       \ ]
 
+for i in g:cow_header
+  let g:dank = "         " . i
+  call add(g:startify_custom_header, dank)
+endfor
 
+" }}}
