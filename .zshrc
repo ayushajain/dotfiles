@@ -1,20 +1,19 @@
-# load private configurations and secrets
-if [ -f ~/.zshrc.private ]; then
-    source ~/.zshrc.private
-fi
+# path to oh my zsh installation
+export ZSH="$HOME/.oh-my-zsh"
 
-# .zshrc
-alias rc="code ~/dotfiles/.zshrc"
-alias rcs="source ~/.zshrc"
-
-# prompt - currently using pure
-fpath+=($HOME/.zsh/pure)
-autoload -U promptinit; promptinit
-prompt pure
-
-# Enable ZSH completion system first
+# enable zsh completion system first
 autoload -Uz compinit
 compinit
+
+# terminal theme
+ZSH_THEME="robbyrussell"
+
+# oh my zsh plugins (cli autocomplete)
+# https://github.com/ohmyzsh/ohmyzsh/wiki/plugins
+plugins=(git aws brew docker dotenv tailscale node nvm npm mise 1password)
+
+# load oh-my-zsh
+source $ZSH/oh-my-zsh.sh
 
 # up/own arrow key bindings for history search
 autoload -U up-line-or-beginning-search
@@ -24,8 +23,13 @@ zle -N down-line-or-beginning-search
 bindkey "^[[A" up-line-or-beginning-search
 bindkey "^[[B" down-line-or-beginning-search
 
-# aliases
-alias cursor="code" # cursor / code
+# mise
+eval "$(~/.local/bin/mise activate zsh)"
+
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # git
 alias g='git'
@@ -45,10 +49,12 @@ git config --global alias.b branch
 git config --global alias.m merge
 git config --global alias.st stash
 
-# mise
-eval "$(~/.local/bin/mise activate zsh)"
+# aliases
+alias cursor="code" # cursor / code
+alias rc="code ~/dotfiles/.zshrc" # edit zshrc
+alias rcs="source ~/.zshrc" # reload zshrc
 
-# nvm
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# load private configurations and secrets
+if [ -f ~/.zshrc.private ]; then
+    source ~/.zshrc.private
+fi
