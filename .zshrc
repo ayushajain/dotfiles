@@ -1,16 +1,15 @@
 # path to oh my zsh installation
 export ZSH="$HOME/.oh-my-zsh"
 
-# enable zsh completion system first
-autoload -Uz compinit
-compinit
-
 # terminal theme
 ZSH_THEME="robbyrussell"
 
 # oh my zsh plugins (cli autocomplete)
 # https://github.com/ohmyzsh/ohmyzsh/wiki/plugins
 plugins=(git aws brew docker dotenv tailscale node nvm npm mise 1password)
+
+# remove lower case env vars from completion
+zstyle ':completion:*:*:-parameter-:*' ignored-patterns '[^A-Z]*'
 
 # load oh-my-zsh
 source $ZSH/oh-my-zsh.sh
