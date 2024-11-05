@@ -18,6 +18,7 @@ brew 'hub'
 # cask "spotify"
 # cask "raycast"
 
+cask "tailscale"
 cask "ngrok"
 # cask "cursor"
 # cask "warp"
